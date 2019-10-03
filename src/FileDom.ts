@@ -11,11 +11,12 @@ export class FileDom {
 	private extName = "backgroundCover";
 	private imagePath: string = '';
 	private imageOpacity: number = 1;
+	private cssTemplate: string = '';
 
-
-	constructor(imagePath: string, opacity: number) {
+	constructor(imagePath: string, opacity: number, cssTemplate: string) {
 		this.imagePath = imagePath;
 		this.imageOpacity = opacity;
+		this.cssTemplate = cssTemplate;
 	}
 
 
@@ -36,20 +37,14 @@ export class FileDom {
 
 		// 重新计算透明度
 		let opacity = this.imageOpacity;
-		opacity = opacity <= 0.1 ? 0.1 : opacity >= 1 ? 1 : opacity;
-		opacity = 0.79 + (0.2 - ((opacity * 2) / 10));
 
 		let imagePath = this.imagePath.replace(/\\/g, '/');
+		let css = this.cssTemplate.replace('%I', imagePath).replace('%O', opacity.toString());
 
 		return `
 		/*ext-${this.extName}-start*/
 		/*ext.${this.extName}.ver.${version}*/
-		body{
-			background-size:cover;
-			background-repeat: no-repeat;
-			opacity:${opacity};
-			background-image:url('${imagePath}');
-		}
+		${css}
 		/*ext-${this.extName}-end*/
 		`;
 	}

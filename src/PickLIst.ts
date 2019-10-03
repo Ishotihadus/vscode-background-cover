@@ -30,44 +30,44 @@ export class PickList {
 			vscode.workspace.getConfiguration('backgroundCover');
 		let list: vscode.QuickPick<ImgItem> =
 			vscode.window.createQuickPick<ImgItem>();
-		list.placeholder = 'Please choose configuration! / 请选择相关配置！';
+		list.placeholder = 'Please choose configuration';
 		let items: ImgItem[] = [
 			{
-				label: '$(file-media)    Select pictures               ',
-				description: '选择一张背景图',
+				label: '$(file-media) Select file',
+				description: 'Choose a background image file',
 				imageType: 1
 			},
 			{
-				label: '$(file-directory)    Add directory                ',
-				description: '添加图片目录',
+				label: '$(file-directory) Select directory',
+				description: 'Choose an image directory',
 				imageType: 2
 			},
 			{
-				label: '$(settings)   Background opacity      ',
-				description: '更新图片不透明度',
-				imageType: 5
-			},
-			{
-				label: '$(pencil)    Input : path/https          ',
-				description: '输入图片路径：本地/https',
+				label: '$(pencil) Select path',
+				description: 'Input an image path directly',
 				imageType: 6
 			},
 			{
-				label: '$(eye-closed)   Closing background      ',
-				description: '关闭背景图',
+				label: '$(settings) Update opacity',
+				description: 'Update the opacity of the background image',
+				imageType: 5
+			},
+			{
+				label: '$(eye-closed) Disable',
+				description: 'Disable background image',
 				imageType: 7
 			},
 		];
 		if (config.autoStatus) {
 			items.push({
-				label: '$(sync)     OFF start replacement   ',
-				description: '关闭启动自动更换',
+				label: '$(sync) Disable automatic replacement',
+				description: 'Disable automatic replacement on opening window',
 				imageType: 10
 			})
 		} else {
 			items.push({
-				label: '$(sync)     ON start replacement   ',
-				description: '开启启动自动更换',
+				label: '$(sync) Enable automatic replacement',
+				description: 'Enable automatic replacement on opening window',
 				imageType: 11
 			})
 		}
@@ -93,13 +93,9 @@ export class PickList {
 	 */
 	public static randomUpdateBackground() {
 		let config = vscode.workspace.getConfiguration('backgroundCover');
-		if (!config.randomImageFolder) {
-			vscode.window.showWarningMessage(
-				'Please add a directory! / 请添加目录！');
-			return false;
-		}
 		PickList.itemList = new PickList(config);
 		PickList.itemList.autoUpdateBackground();
+		PickList.itemList.updateDom();
 		PickList.itemList = undefined;
 		return vscode.commands.executeCommand('workbench.action.reloadWindow');
 	}
@@ -162,7 +158,7 @@ export class PickList {
 			case 11:
 				if (!this.config.randomImageFolder) {
 					vscode.window.showWarningMessage(
-						'Please add a directory! / 请添加目录后再来开启！');
+						'Please choose a directory before enabling automatic replacement');
 				} else {
 					this.setConfigValue('autoStatus', true, false);
 					this.autoUpdateBackground();
@@ -210,8 +206,8 @@ export class PickList {
 	// 根据图片目录展示图片列表
 	private imgList(folderPath?: string) {
 		let items: ImgItem[] = [{
-			label: '$(diff-added)  Manual selection',
-			description: '选择一张背景图',
+			label: '$(diff-added) Select image manually',
+			description: 'Update the background image to a specified image from the directory',
 			imageType: 3
 		}];
 
@@ -225,8 +221,8 @@ export class PickList {
 				// 获取一个随机路径存入数组中
 				let randomFile = files[Math.floor(Math.random() * files.length)];
 				items.push({
-					label: '$(light-bulb)   Random pictures',
-					description: '随机自动选择       ctrl+shift+F7',
+					label: '$(light-bulb) Select image randomly',
+					description: 'Update the background image to a randomly selected image (Ctrl+Shift+F7)',
 					imageType: 4,
 					path: path.join(randomPath, randomFile)
 				});
@@ -281,10 +277,10 @@ export class PickList {
 		if (type <= 0 || type > 2) { return false; }
 
 		let placeString = type === 2 ?
-			'Opacity ranges：0.00 - 1,current:(' + this.opacity + ')' :
-			'Please enter the image path to support local and HTTPS';
+			'Opacity: 0 - 1 (current: ' + this.opacity + ')' :
+			'Please enter the image path (local or https)';
 		let promptString =
-			type === 2 ? '设置图片不透明度：0-1' : '请输入图片路径，支持本地及https';
+			type === 2 ? 'Enter the opacity of the background image from 0 to 1' : 'Enter a local or online path of the image';
 
 
 		let option: vscode.InputBoxOptions = {
@@ -298,7 +294,7 @@ export class PickList {
 			//未输入值返回false
 			if (!value) {
 				vscode.window.showWarningMessage(
-					'Please enter configuration parameters / 请输入配置参数！');
+					'Cannot leave the parameter empty');
 				return;
 			}
 			if (type === 1) {
@@ -307,14 +303,14 @@ export class PickList {
 				let isUrl = (value.substr(0, 8).toLowerCase() === 'https://');
 				if (!fsStatus && !isUrl) {
 					vscode.window.showWarningMessage(
-						'Please enter the correct file format path! / 请输入正确的文件格式路径！');
+						'Invalid image path (file not found or invalid url)');
 					return false;
 				}
 			} else {
 				let isOpacity = parseFloat(value);
 
 				if (isOpacity < 0 || isOpacity > 1 || isNaN(isOpacity)) {
-					vscode.window.showWarningMessage('Opacity ranges in：0 - 1！');
+					vscode.window.showWarningMessage('Opacity must be between 0 and 1');
 					return false;
 				}
 			}
@@ -328,7 +324,7 @@ export class PickList {
 	// 更新配置
 	private updateBackgound(path?: string) {
 		if (!path) {
-			return vsHelp.showInfo('Unfetched Picture Path / 未获取到图片路径');
+			return vsHelp.showInfo('Image path is not specified');
 		}
 		this.setConfigValue('imagePath', path);
 	}
@@ -343,7 +339,7 @@ export class PickList {
 			canSelectFolders: isFolders,
 			canSelectFiles: isFiles,
 			canSelectMany: false,
-			openLabel: 'Select folder',
+			openLabel: 'Select directory',
 			filters: filters
 		});
 		if (!folderUris) {
@@ -385,7 +381,7 @@ export class PickList {
 
 	// 更新、卸载css
 	private updateDom(uninstall: boolean = false) {
-		let dom: FileDom = new FileDom(this.imgPath, this.opacity);
+		let dom: FileDom = new FileDom(this.imgPath, this.opacity, this.config.customCss);
 		let result = false;
 		if (uninstall) {
 			result = dom.uninstall();
@@ -393,14 +389,14 @@ export class PickList {
 			result = dom.install();
 		}
 		if (result && this.quickPick) {
-			this.quickPick.placeholder = 'Reloading takes effect? / 重新加载生效？';
+			this.quickPick.placeholder = 'Reload to take effect the configuration now?';
 			this.quickPick.items = [
 				{
-					label: '$(check)   YES',
-					description: '立即重新加载窗口生效',
+					label: '$(check) YES',
+					description: 'Reload now',
 					imageType: 8
 				},
-				{ label: '$(x)   NO', description: '稍后手动重启', imageType: 9 }
+				{ label: '$(x) NO', description: 'Manually reload later', imageType: 9 }
 			];
 			this.quickPick.ignoreFocusOut = true;
 			this.quickPick.show();

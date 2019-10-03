@@ -1,9 +1,9 @@
 {
-    "name": "background-cover",
-    "displayName": "background-cover",
-    "description": "Add a picture you like to cover the entire vscode..",
-    "version": "2.2.2",
-    "publisher": "manasxx",
+    "name": "background-cover-ishotihadus",
+    "displayName": "background-cover-ishotihadus",
+    "description": "Attach background images to VSCode windows (forked from background-cover by AShujiao)",
+    "version": "2.202.0",
+    "publisher": "ishotihadus",
     "engines": {
         "vscode": "^1.26.0"
     },
@@ -49,35 +49,40 @@
                     "maximum": 1,
                     "minimum": 0,
                     "default": 0.2,
-                    "description": "Background opacity (0 - 1) / 背景透明度(0 - 1)"
+                    "description": "Background opacity (0 - 1)"
+                },
+                "backgroundCover.customCss": {
+                    "type": "string",
+                    "default": "body::after{ top: 0; left: 0; right: 0; bottom: 0; mix-blend-mode: multiply; content: ''; position: absolute; background-size: cover; background-repeat: no-repeat; pointer-events: none; z-index: 100; opacity: %O; background-image: url('%I'); }",
+                    "description": "Custom CSS code (%I: image url, %O: opacity)"
                 },
                 "backgroundCover.imagePath": {
                     "type": "string",
                     "default": "",
-                    "description": "Background image path / 背景图片路径"
+                    "description": "Background image path"
                 },
                 "backgroundCover.randomImageFolder": {
                     "type": "string",
                     "default": "",
-                    "description": "Background image's folder path for random / 图片目录"
+                    "description": "Background image's folder path for random"
                 },
                 "backgroundCover.autoStatus": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Automatically change background each time you start / 每次启动时随机自动更换背景"
+                    "description": "Automatically change background each time you start"
                 }
             }
         }
     },
     "bugs": {
-        "url": "https://github.com/AShujiao/vscode-background-cover/issues",
-        "email": "a916817706@live.com"
+        "url": "https://github.com/ishotihadus/vscode-background-cover/issues",
+        "email": "hanachan.pao@gmail.com"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/AShujiao/vscode-background-cover.git"
+        "url": "https://github.com/ishotihadus/vscode-background-cover.git"
     },
-    "homepage": "https://github.com/AShujiao/vscode-background-cover/blob/master/README.md#manasxx-readme",
+    "homepage": "https://github.com/ishotihadus/vscode-background-cover",
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "vscode:uninstall": "node ./out/uninstall",
