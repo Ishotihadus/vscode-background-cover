@@ -28,7 +28,7 @@
         "commands": [
             {
                 "command": "extension.backgroundCover.start",
-                "title": "backgroundCover - start"
+                "title": "backgroundCover - open menu"
             },
             {
                 "command": "extension.backgroundCover.refresh",
