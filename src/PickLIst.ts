@@ -44,7 +44,7 @@ export class PickList {
 			},
 			{
 				label: '$(pencil) Select path',
-				description: 'Input an image path directly',
+				description: 'Select an image path directly',
 				imageType: 6
 			},
 			{
