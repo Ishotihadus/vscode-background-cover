@@ -2,7 +2,7 @@
     "name": "background-cover-ishotihadus",
     "displayName": "background-cover-ishotihadus",
     "description": "Attach background images to VSCode windows (forked from background-cover by AShujiao)",
-    "version": "2.203.0",
+    "version": "2.203.1",
     "publisher": "ishotihadus",
     "engines": {
         "vscode": "^1.38.0"
