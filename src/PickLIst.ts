@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -23,6 +24,12 @@ export class PickList {
 
 	// 当前配置的背景图透明度
 	private opacity: number;
+
+	// 图片类型 1:本地文件，2：https
+	private imageFileType: number;
+
+	// 当前系统标识
+	private osType: number;
 
 	// 初始下拉列表
 	public static createItemLIst() {
@@ -71,6 +78,12 @@ export class PickList {
 				imageType: 11
 			})
 		}
+		// 更多
+		items.push({
+			label: '$(three-bars)    More                              ',
+			description: '更多',
+			imageType: 12
+		})
 		list.items = items;
 		PickList.itemList = new PickList(config, list);
 	}
@@ -107,6 +120,23 @@ export class PickList {
 		this.config = config;
 		this.imgPath = config.imagePath;
 		this.opacity = config.opacity;
+		this.imageFileType = 1;
+
+		switch (os.type()) {
+			case 'Windows_NT':
+				this.osType = 1;
+				break;
+			case 'Darwin':
+				this.osType = 2;
+				break;
+			case 'Linux':
+				this.osType = 3;
+				break;
+			default:
+				this.osType = 1;
+				break
+		}
+
 		if (pickList) {
 			this.quickPick = pickList;
 			this.quickPick.onDidAccept(
@@ -165,9 +195,55 @@ export class PickList {
 				}
 				this.quickPick.hide();
 				break;
+			case 12:
+				this.moreMenu();
+				break;
+			case 13:
+				this.gotoPath(path);
+				break;
 			default:
 				break;
 		}
+	}
+
+	private gotoPath(path?: string) {
+		if (path == undefined) {
+			return vscode.window.showWarningMessage('无效菜单');
+		}
+		let tmpUri: string = path
+		vscode.env.openExternal(vscode.Uri.parse(tmpUri))
+	}
+
+	private moreMenu() {
+		let items: ImgItem[] = [
+			{
+				label: '$(github)    Repository               ',
+				description: '仓库地址',
+				imageType: 13,
+				path: "https://github.com/AShujiao/vscode-background-cover"
+			},
+			{
+				label: '$(issues)    Issues                       ',
+				description: '有疑问就来提问',
+				imageType: 13,
+				path: "https://github.com/AShujiao/vscode-background-cover/issues"
+			},
+			{
+				label: '$(star)    Star                           ',
+				description: '给作者点个Star吧',
+				imageType: 13,
+				path: "https://github.com/AShujiao/vscode-background-cover"
+			},
+			{
+				label: '$(heart)    Help                          ',
+				description: '嘘寒问暖，不如打笔巨款O(∩_∩)O哈哈~      ',
+				imageType: 13,
+				path: "https://github.com/AShujiao/AShujiao/issues/1"
+			}
+		];
+
+		this.quickPick.items = items;
+		this.quickPick.show();
 	}
 
 	//释放资源
@@ -245,8 +321,8 @@ export class PickList {
 		}
 		// 获取目录下的所有图片
 		let files: string[] = fs.readdirSync(path.resolve(pathUrl)).filter((s) => {
-			return s.endsWith('.png') || s.endsWith('.jpg') || s.endsWith('.jpeg') ||
-				s.endsWith('.gif') || s.endsWith('.webp') || s.endsWith('.bmp');
+			return s.endsWith('.png') || s.endsWith('.PNG') || s.endsWith('.jpg') || s.endsWith('.JPG')
+				|| s.endsWith('.jpeg') || s.endsWith('.gif') || s.endsWith('.webp') || s.endsWith('.bmp');
 		});
 
 		return files;
@@ -305,6 +381,10 @@ export class PickList {
 					vscode.window.showWarningMessage(
 						'Invalid image path (file not found or invalid url)');
 					return false;
+				}
+				// 如果为https连接图片，则更新图片类型
+				if (isUrl) {
+					this.imageFileType = 2;
 				}
 			} else {
 				let isOpacity = parseFloat(value);
@@ -386,7 +466,17 @@ export class PickList {
 		if (uninstall) {
 			result = dom.uninstall();
 		} else {
-			result = dom.install();
+			// 是否需要转base64
+			if (this.imageFileType == 1) {
+				dom.imageToBase64();
+			}
+			if (this.osType === 1) {
+				result = dom.install();
+			} else if (this.osType === 2) {
+				result = dom.installMac();
+			} else if (this.osType === 3) {
+				result = dom.install(); // 暂未做对应处理
+			}
 		}
 		if (result && this.quickPick) {
 			this.quickPick.placeholder = 'Reload to take effect the configuration now?';
