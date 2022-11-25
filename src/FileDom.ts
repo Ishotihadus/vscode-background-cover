@@ -35,12 +35,7 @@ export class FileDom {
 	}
 
 	private getCss(): string {
-
-		// 重新计算透明度
-		let opacity = this.imageOpacity;
-
-		let imagePath = this.imagePath.replace(/\\/g, '/');
-		let css = this.cssTemplate.replace('%I', imagePath).replace('%O', opacity.toString());
+		let css = this.cssTemplate.replace('%I', this.imagePath).replace('%O', this.imageOpacity.toString());
 
 		return `
 		/*ext-${this.extName}-start*/
